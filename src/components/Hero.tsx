@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Github, Linkedin, Twitter, Instagram, Send, Sparkles, GraduationCap, Award } from 'lucide-react';
 import { PERSONAL_INFO } from '../data';
+import profilePic from '../assets/images/instasquare.photoeditor.effect.cutout_202641023822343.png';
 
 export default function Hero() {
   const containerVariants = {
@@ -160,7 +161,7 @@ export default function Hero() {
                 {/* Real local generated image inside */}
                 <div className="w-full h-full rounded-2xl overflow-hidden bg-slate-950 relative group">
                    <img
-                    src="/src/assets/images/instasquare.photoeditor.effect.cutout_202641023822343.png"
+                    src={profilePic}
                     alt={PERSONAL_INFO.fullName}
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
