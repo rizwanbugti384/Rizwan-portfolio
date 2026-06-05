@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny catch-all safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions for validation
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isDeveloperAdmin() {
+      return isSignedIn() 
+        && request.auth.token.email == "boss588384@gmail.com" 
+        && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string 
+        && id.size() <= 128 
+        && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['name', 'email', 'subject', 'message', 'createdAt', 'date'])
+        && data.keys().size() == 6
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 200
+        && data.email is string && data.email.size() > 0 && data.email.size() <= 200
+        && data.subject is string && data.subject.size() > 0 && data.subject.size() <= 300
+        && data.message is string && data.message.size() >= 10 && data.message.size() <= 5000
+        && data.date is string && data.date.size() > 0 && data.date.size() <= 100
+        && data.createdAt == request.time;
+    }
+
+    // Messages collection routing and rules
+    match /messages/{messageId} {
+      // General public can submit contact form inquiries
+      allow create: if isValidId(messageId) && isValidMessage(incoming());
+
+      // Individual get lookup (safe as message ID is random/unpredictable)
+      allow get: if isValidId(messageId);
+
+      // Bulk listing/search and deleting is strictly authorized for the Developer
+      allow list, delete: if isDeveloperAdmin();
+    }
+  }
+}
